@@ -1,4 +1,4 @@
-package zerobase.secondhand_transaction.model;
+package zerobase.secondhand_transaction.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import zerobase.secondhand_transaction.model.constants.Authority;
+import zerobase.secondhand_transaction.entity.constant.Authority;
 
 import java.util.Collection;
 import java.util.List;
