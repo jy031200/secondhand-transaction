@@ -5,6 +5,10 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+build.gradle
+application.properties
+
+
 ### STS ###
 .apt_generated
 .classpath
@@ -25,6 +29,9 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+
+
+
 
 ### NetBeans ###
 /nbproject/private/
