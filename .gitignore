@@ -6,6 +6,8 @@ build/
 !**/src/test/**/build/
 
 build.gradle
+application.properties
+
 
 ### STS ###
 .apt_generated
@@ -27,6 +29,9 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+
+
+
 
 ### NetBeans ###
 /nbproject/private/
