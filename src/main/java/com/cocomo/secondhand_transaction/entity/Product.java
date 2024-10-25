@@ -134,5 +134,51 @@ public class Product {
         this.pd_num = generateProductNumber();
     }
 
+    public void updateProductInfo(ProductDto productDto, String location, Double latitude, Double longitude) {
+        if (productDto.getPd_name() != null && !productDto.getPd_name().equals(this.pd_name)) {
+            this.pd_name = productDto.getPd_name();
+        }
 
+        // 상품 이미지 변경
+        if (productDto.getPd_img() != null && !productDto.getPd_img().equals(this.pd_img)) {
+            this.pd_img = productDto.getPd_img();
+        }
+
+        // 상품 가격 변경
+        if (productDto.getPd_price() != null && !productDto.getPd_price().equals(this.pd_price)) {
+            this.pd_price = productDto.getPd_price();
+        }
+
+        // 상세 설명 변경
+        if (productDto.getPd_detail() != null && !productDto.getPd_detail().equals(this.pd_detail)) {
+            this.pd_detail = productDto.getPd_detail();
+        }
+
+        if (location != null) {
+            this.location = location;
+        }
+
+        if (latitude != null) {
+            this.latitude = latitude;
+        }
+
+        if (longitude != null) {
+            this.longitude = longitude;
+        }
+
+        // 거래 장소 변경
+        if (productDto.getPlace() != null && !productDto.getPlace().equals(this.place)) {
+            this.place = productDto.getPlace();
+        }
+
+        // 거래 가능 시간 변경
+        if (productDto.getTime() != null) {
+            this.time = productDto.getTime();  // 여기서는 리스트이기 때문에 null 체크만 필요
+        }
+
+        // 카테고리 변경
+        if (productDto.getCategory() != null && !productDto.getCategory().equals(this.category)) {
+            this.category = productDto.getCategory();
+        }
+    }
 }
