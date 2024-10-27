@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import zerobase.secondhand_transaction.entity.constant.Authority;
 
-
 import java.security.Key;
 import java.util.Date;
 
