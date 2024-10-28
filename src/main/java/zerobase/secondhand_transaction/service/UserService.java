@@ -71,3 +71,4 @@ public class UserService implements UserDetailsService {
         redisTemplate.delete("JWT:" + email);
     }
 }
+

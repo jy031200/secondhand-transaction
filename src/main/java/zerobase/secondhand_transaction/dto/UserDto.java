@@ -4,7 +4,6 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import zerobase.secondhand_transaction.entity.constant.Authority;
 
 public class UserDto {
@@ -40,14 +39,14 @@ public class UserDto {
                 message = "비밀번호 형식이 올바르지 않습니다. 8자 이상, 대소문자 포함, 숫자 및 특수문자(@$!%*?&#) 포함")
         private String password;
 
-
-        @NotBlank(message = "전화번호를 작성해주세요")
-        @Size(min = 11, max = 13)
-        @Pattern(regexp = "^\\d{2,3}-\\d{3,4}-\\d{4}$",
-                message = "핸드폰 번호의 약식과 맞지 않습니다. xxx-xxxx-xxxx")
+        @NotNull(message = "전화번호를 작성해주세요")
+        // @Size(min = 9, max = 11)
+        // @Pattern(regexp = "^\\d{2,3}-\\d{3,4}-\\d{4}$",
+        //         message = "핸드폰 번호의 약식과 맞지 않습니다. xxx-xxxx-xxxx")
         // 받아들이는 문자의 형태를 직접 제한하는 방법 (정규식을 사용)
         // message에는 error가 발생했을 때 출력할 메세지를 적는다.
-        private int phone_nb;
+        private long phone_nb;
+
 
         @NotNull(message = "권한을 선택해주세요")
         private Authority authority;

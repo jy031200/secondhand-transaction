@@ -17,6 +17,7 @@ import zerobase.secondhand_transaction.service.UserService;
 
 import java.io.IOException;
 
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String TOKEN_HEADER = "Authorization";
-    private static final String TOKEN_PREFIX = "Bearer ";
+    private static final String TOKEN_BEARER_PREFIX = "Bearer ";
     private final UserService userService;
 
     @Override
@@ -76,8 +77,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("Bearer token: {}", bearerToken);
         // 현재 들어온 http 요청에서 토큰의 헤더값 추출
 
-        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
-            return bearerToken.substring(TOKEN_PREFIX.length());
+        if (bearerToken != null && bearerToken.startsWith(TOKEN_BEARER_PREFIX)) {
+            return bearerToken.substring(TOKEN_BEARER_PREFIX.length());
         }
         // 토큰이 비어있지 않은지 + bearer 로 시작하는지 확인
         // => 조건 만족 시 Bearer 접두사 제거한 실제 토큰 문자열 반환

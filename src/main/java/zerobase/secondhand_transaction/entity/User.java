@@ -34,14 +34,14 @@ public class User implements UserDetails {
     private String password;
 
     @Column(nullable = false)
-    private int phone_nb;
+    private long phone_nb;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Authority authority;
 
 
-    public User(String email, String nickname, String password, int phone_nb, Authority authority) {
+    public User(String email, String nickname, String password, long phone_nb, Authority authority) {
         this.email = email;
         this.nickname = nickname;
         this.password = password;
