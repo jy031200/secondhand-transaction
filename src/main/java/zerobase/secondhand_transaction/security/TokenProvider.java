@@ -36,8 +36,7 @@ public class TokenProvider {
         var expiration = new Date(now.getTime() + TOKEN_EXPIRE_TIME); // 만료 시간
 
         // 클레임 생성 및 설정
-        Claims claims = Jwts.claims()
-                .setSubject(email);
+        Claims claims = Jwts.claims().setSubject(email);
         claims.put(KEY_ROLES, authority);
         /*
          Claim -> jwt 토큰의 페이로드에 포함될 데이터를 담는 객체

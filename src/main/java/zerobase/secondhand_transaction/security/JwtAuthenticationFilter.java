@@ -77,11 +77,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("Bearer token: {}", bearerToken);
         // 현재 들어온 http 요청에서 토큰의 헤더값 추출
 
+        // if (bearerToken != null && bearerToken.startsWith(TOKEN_BEARER_PREFIX)) {
+        //     return bearerToken.substring(TOKEN_BEARER_PREFIX.length());
+        // }
+
         if (bearerToken != null && bearerToken.startsWith(TOKEN_BEARER_PREFIX)) {
-            return bearerToken.substring(TOKEN_BEARER_PREFIX.length());
+            String token = bearerToken.substring(TOKEN_BEARER_PREFIX.length());
+            if (token.split("\\.").length == 3) {
+                return token;
+            } else {
+                log.error("Malformed JWT token: {}", token);
+            }
         }
-        // 토큰이 비어있지 않은지 + bearer 로 시작하는지 확인
-        // => 조건 만족 시 Bearer 접두사 제거한 실제 토큰 문자열 반환
+         // 토큰이 비어있지 않은지 + bearer 로 시작하는지 확인
+         // => 조건 만족 시 Bearer 접두사 제거한 실제 토큰 문자열 반환
         return null;
     }
 }
