@@ -6,20 +6,32 @@ import com.cocomo.secondhand_transaction.entity.User;
 import com.cocomo.secondhand_transaction.entity.constant.Category;
 import com.cocomo.secondhand_transaction.repository.ProductRepository;
 import com.cocomo.secondhand_transaction.repository.UserRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -31,41 +43,87 @@ public class ProductService {
     private String apiKey;
 
     // 1. 위치(주소) -> 위도와 경도로 변환
+    // 위치(주소) -> 위도와 경도로 변환
     public double[] getCoordinatesFromLocation(String location) {
-        try {
-            // url 인코딩 적용
-            String encodedLocation = URLEncoder.encode(location, StandardCharsets.UTF_8);
-            String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + encodedLocation + "&key=" + apiKey;
-            Map response = restTemplate.getForObject(url, Map.class);
+        log.debug("Entering getCoordinatesFromLocation with location: {}", location);
+        String encodedLocation = URLEncoder.encode(location, StandardCharsets.UTF_8);
+        String urlStr = "https://maps.googleapis.com/maps/api/geocode/json?address=" + encodedLocation + "&key=" + apiKey;
 
-            // json 응답에서 위도와 경도 추출
-            List results = (List) response.get("results");
-            if (!results.isEmpty()) {
-                Map geometry = (Map) ((Map) results.get(0)).get("geometry");
-                Map locationMap = (Map) geometry.get("location");
-                double lat = (Double) locationMap.get("lat");
-                double lng = (Double) locationMap.get("lng");
+        try {
+            // URL 생성 및 연결 설정
+            URL url = new URL(urlStr);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            // 응답 확인 및 데이터 읽기
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+
+            // 연결 종료 및 데이터 로그
+            in.close();
+            log.debug("Geocoding API JSON response (HttpURLConnection): {}", content);
+
+            // JSON 파싱
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> response = objectMapper.readValue(content.toString(), Map.class);
+            List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
+
+            if (results != null && !results.isEmpty()) {
+                Map<String, Object> geometry = (Map<String, Object>) results.get(0).get("geometry");
+                Map<String, Double> locationMap = (Map<String, Double>) geometry.get("location");
+                double lat = locationMap.get("lat");
+                double lng = locationMap.get("lng");
                 return new double[]{lat, lng};
             } else {
+                log.warn("No results found for location: {}", location);
                 throw new RuntimeException("위치를 찾을 수 없습니다.");
             }
         } catch (Exception e) {
+            log.error("Error occurred while fetching coordinates for location: {}", location, e);
             throw new RuntimeException("요청 실패");
         }
     }
 
+
+
+
     // 2. 위도 경도 -> 위치(주소)로 변환
     public String getLocationFromCoordinates(double latitude, double longitude) {
-        String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng="
-                + latitude + "," + longitude + "&key=" + apiKey;
+        String urlString = "https://maps.googleapis.com/maps/api/geocode/json?latlng="
+                + latitude + "," + longitude + "&key=" + apiKey + "&language=ko";
 
-        Map response = restTemplate.getForObject(url, Map.class);
+        try {
+            // Create a URL and open a connection
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
 
-        List results = (List) response.get("results");
-        if (!results.isEmpty()) {
-            return (String) ((Map) results.get(0)).get("formatted_address");
-        } else {
-            throw new RuntimeException("위치 정보를 찾을 수 없습니다.");
+            // Read the response
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) {
+                response.append(line);
+            }
+            in.close();
+
+            // Parse JSON response
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode responseJson = objectMapper.readTree(response.toString());
+
+            JsonNode results = responseJson.get("results");
+            if (results != null && results.size() > 0) {
+                return results.get(0).get("formatted_address").asText();
+            } else {
+                throw new RuntimeException("위치 정보를 찾을 수 없습니다.");
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("요청 실패", e);
         }
     }
 
@@ -165,7 +223,7 @@ public class ProductService {
     public void updateProduct(String pdNum, ProductDto productDto, Authentication authentication) {
         User user = findUserByAuthentication(authentication);
 
-        Product product = productRepository.findProductByPd_num(pdNum)
+        Product product = productRepository.findProductByPdNum(pdNum)
                 .orElseThrow(() ->new EntityNotFoundException("해당 상품을 찾을 수 없습니다."));
 
         // 상품 등록자와 유저가 올바른지 확인
@@ -187,7 +245,7 @@ public class ProductService {
     public void deleteProduct(String pdNum, Authentication authentication) {
         User user = findUserByAuthentication(authentication);
 
-        Product product = productRepository.findProductByPd_num(pdNum)
+        Product product = productRepository.findProductByPdNum(pdNum)
                 .orElseThrow(() -> new EntityNotFoundException("해당 상품을 찾을 수 없습니다."));
 
         if (!product.getUser().getId().equals(user.getId())) {

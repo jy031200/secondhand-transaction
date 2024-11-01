@@ -3,6 +3,8 @@ package com.cocomo.secondhand_transaction.entity;
 import com.cocomo.secondhand_transaction.dto.ProductDto;
 import com.cocomo.secondhand_transaction.entity.constant.Category;
 import com.cocomo.secondhand_transaction.entity.constant.Status;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +22,7 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private Integer id;
 
     @Column(nullable = false)
@@ -27,6 +30,7 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user; // 상품 등록한 유저 (1:N)
 
     @Column(nullable = false)
@@ -67,7 +71,7 @@ public class Product {
     // 거래 요청 상태 (0: 기본, 1: 요청됨, 2: 승인됨, -1: 거절됨)
 
     @Column(nullable = false)
-    private String pd_num; // 상품 등록 번호 (중복 없음) (이 번호로 상품 구별)
+    private String pdNum; // 상품 등록 번호 (중복 없음) (이 번호로 상품 구별)
 
     @PrePersist
     public void prePersist(){
@@ -95,7 +99,7 @@ public class Product {
         this.status = Status.AVAILABLE; // 상태 초기값 : 구매 가능
         this.category = productDto.getCategory();
         this.request_buy = 0; // 거래 요청 상태 기본값 : 0
-        this.pd_num = generateProductNumber();
+        this.pdNum = generateProductNumber();
     }
 
     // 2. 생성자 (위치만 입력한 경우 -> 위도 경도 따로 넣어주기)
@@ -113,7 +117,7 @@ public class Product {
         this.status = Status.AVAILABLE; // 상태 초기값 : 구매 가능
         this.category = productDto.getCategory();
         this.request_buy = 0; // 거래 요청 상태 기본값 : 0
-        this.pd_num = generateProductNumber();
+        this.pdNum = generateProductNumber();
     }
 
     // 3. 생성자 (위치 기반으로 상품 등록 -> 위도 경도만 저장되기 때문에 위치는 따로 넣어주어야 함)
@@ -131,7 +135,7 @@ public class Product {
         this.status = Status.AVAILABLE; // 상태 초기값 : 구매 가능
         this.category = productDto.getCategory();
         this.request_buy = 0; // 거래 요청 상태 기본값 : 0
-        this.pd_num = generateProductNumber();
+        this.pdNum = generateProductNumber();
     }
 
     public void updateProductInfo(ProductDto productDto, String location, Double latitude, Double longitude) {

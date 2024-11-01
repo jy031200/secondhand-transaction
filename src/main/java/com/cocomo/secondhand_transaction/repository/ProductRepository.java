@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
     // 특정 상품 눌렀을 때
-    Optional<Product> findProductByPd_num(String num);
+    Optional<Product> findProductByPdNum(String num);
 
 //    // 상품 목록 조회
 //    // 1. 특정 유저의 상품 조회

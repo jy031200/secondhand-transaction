@@ -1,6 +1,7 @@
 package com.cocomo.secondhand_transaction.dto;
 
 import com.cocomo.secondhand_transaction.entity.constant.Category;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -27,10 +28,13 @@ public class ProductDto {
 
     private String pd_detail;
 
-    private String location;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String location; // 선택
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double latitude;  // 위도 (선택)
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double longitude; // 경도 (선택)
 
     @NotBlank
