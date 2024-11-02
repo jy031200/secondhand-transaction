@@ -6,7 +6,7 @@ import com.cocomo.secondhand_transaction.entity.User;
 import com.cocomo.secondhand_transaction.entity.constant.Category;
 import com.cocomo.secondhand_transaction.repository.ProductRepository;
 import com.cocomo.secondhand_transaction.repository.UserRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.cocomo.secondhand_transaction.util.Haversine;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -30,6 +29,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -156,7 +156,7 @@ public class ProductService {
             product = new Product(productDto, user, latitude, longitude);
         }
 
-        // 3. 위치 없이 위도 경도만 저장 했을 때?
+        // 3. 위치 없이 위도 경도만 저장 했을 때
         if (productDto.getLocation() == null && productDto.getLatitude() != null && productDto.getLongitude() != null) {
             String location = getLocationFromCoordinates(productDto.getLatitude(), productDto.getLongitude());
             product = new Product(productDto, user, location);
@@ -217,6 +217,20 @@ public class ProductService {
     }
 
     // 상품 조회 - 2. 사용자 위치 기반
+    public List<Product> searchWithLocation(Double latitude, Double longitude) {
+        double distance = 5.0; // 항상 5km로 설정
+
+        List<Product> allProducts = productRepository.findAll(); // 모든 상품 조회
+
+        // 반경 내의 상품 필터링
+        return allProducts.stream()
+                .filter(product -> {
+                    double productDistance = Haversine.calculateDistance(
+                            latitude, longitude, product.getLatitude(), product.getLongitude());
+                    return productDistance <= distance; // 5km 이내의 상품만 필터링
+                })
+                .collect(Collectors.toList());
+    }
 
 
     // 상품 수정
@@ -251,7 +265,6 @@ public class ProductService {
         if (!product.getUser().getId().equals(user.getId())) {
             throw  new RuntimeException("상품을 삭제할 권한이 없습니다");
         }
-
         productRepository.delete(product);
     }
 

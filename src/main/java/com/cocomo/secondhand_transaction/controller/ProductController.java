@@ -44,10 +44,13 @@ public class ProductController {
     }
 
     // 상품 조회 - 2. 사용자의 위치 기반 조회 (반경 5km 내의 상품들만 출력)
-//    @GetMapping("/mylocation")
-//    public ResponseEntity<?> searchWithLocation() {
-//
-//    }
+    @GetMapping("/mylocation")
+    public ResponseEntity<?> searchWithLocation(
+            @RequestParam Double latitude,
+            @RequestParam Double longitude) {
+        List<Product> products = productService.searchWithLocation(latitude, longitude);
+        return ResponseEntity.ok(products);
+    }
 
 
     // 상품 수정
@@ -70,5 +73,4 @@ public class ProductController {
         productService.deleteProduct(pdNum, authentication);
         return ResponseEntity.ok("상품이 삭제되었습니다.");
     }
-
 }
