@@ -4,7 +4,6 @@ import com.cocomo.secondhand_transaction.dto.ProductDto;
 import com.cocomo.secondhand_transaction.entity.constant.Category;
 import com.cocomo.secondhand_transaction.entity.constant.Status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,8 +42,10 @@ public class Product {
 
     private String location; // 위치 (선택)
 
+    @JsonIgnore
     private Double latitude;  // 위도 (선택)
 
+    @JsonIgnore
     private Double longitude; // 경도 (선택)
 
     @Column(nullable = false)
@@ -62,13 +63,10 @@ public class Product {
     private Category category;
 
     @Column(nullable = false)
+    @JsonIgnore
     private LocalDateTime createdDt;
-    // 등록일 한달이내에 판매 x 상태이면 삭제하도록
+    // 등록일 한달이내에 판매 x 상태이면 삭제하도록??
     // => 이건 한 3주 후에 알림 주도록
-
-    @Column(nullable = false)
-    private int request_buy;
-    // 거래 요청 상태 (0: 기본, 1: 요청됨, 2: 승인됨, -1: 거절됨)
 
     @Column(nullable = false)
     private String pdNum; // 상품 등록 번호 (중복 없음) (이 번호로 상품 구별)
@@ -98,7 +96,6 @@ public class Product {
         this.time = productDto.getTime();
         this.status = Status.AVAILABLE; // 상태 초기값 : 구매 가능
         this.category = productDto.getCategory();
-        this.request_buy = 0; // 거래 요청 상태 기본값 : 0
         this.pdNum = generateProductNumber();
     }
 
@@ -116,7 +113,6 @@ public class Product {
         this.time = productDto.getTime();
         this.status = Status.AVAILABLE; // 상태 초기값 : 구매 가능
         this.category = productDto.getCategory();
-        this.request_buy = 0; // 거래 요청 상태 기본값 : 0
         this.pdNum = generateProductNumber();
     }
 
@@ -134,7 +130,6 @@ public class Product {
         this.time = productDto.getTime();
         this.status = Status.AVAILABLE; // 상태 초기값 : 구매 가능
         this.category = productDto.getCategory();
-        this.request_buy = 0; // 거래 요청 상태 기본값 : 0
         this.pdNum = generateProductNumber();
     }
 
@@ -184,5 +179,10 @@ public class Product {
         if (productDto.getCategory() != null && !productDto.getCategory().equals(this.category)) {
             this.category = productDto.getCategory();
         }
+    }
+
+    // 상품 상태 변경
+    public void updateProductStatus(Status status) {
+        this.status = status;
     }
 }

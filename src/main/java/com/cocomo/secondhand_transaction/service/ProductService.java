@@ -19,7 +19,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -37,7 +36,6 @@ import java.util.stream.Collectors;
 public class ProductService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${google.api.key}")
     private String apiKey;
@@ -97,12 +95,10 @@ public class ProductService {
                 + latitude + "," + longitude + "&key=" + apiKey + "&language=ko";
 
         try {
-            // Create a URL and open a connection
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
 
-            // Read the response
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder response = new StringBuilder();
             String line;
@@ -111,7 +107,6 @@ public class ProductService {
             }
             in.close();
 
-            // Parse JSON response
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode responseJson = objectMapper.readTree(response.toString());
 
